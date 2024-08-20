@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basta - Juego de Letras</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            height: 100vh;
+            background: url('espacio.jpg') no-repeat center center fixed;
+            background-size: cover;
+            overflow: hidden;
+        }
+        .letter {
+            font-size: 3em;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            background-color: #31363a7a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .letter.transparent {
+            opacity: 0.3;
+        }
+        #startButton {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 10; /* Asegura que esté encima de las letras */
+        }
+        #timer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2em;
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="timer">00:00</div>
+    <button id="startButton">Iniciar</button>
+
+    <script>
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const body = document.body;
+        let timerInterval;
+        let timeLeft = 15;
+        const letterSize = 60; // Tamaño de los botones de letra
+        const minSpacing = 80; // Espacio mínimo entre letras para evitar superposición
+        const buttonSize = 60; // Tamaño del botón de inicio
+
+        // Crear botones de letras y distribuirlos aleatoriamente sin superposiciones
+        function createLetterButtons() {
+            const positions = []; // Para almacenar posiciones usadas y evitar superposición
+
+            for (let i = 0; i < letters.length; i++) {
+                const button = document.createElement('button');
+                button.classList.add('letter');
+                button.textContent = letters[i];
+
+                let x, y, overlap;
+                do {
+                    overlap = false;
+                    // Generar posiciones aleatorias
+                    x = Math.random() * (window.innerWidth - letterSize);
+                    y = Math.random() * (window.innerHeight - letterSize - buttonSize); // Ajuste para evitar el área del botón de inicio
+
+                    // Verificar si la nueva posición se superpone con alguna existente
+                    for (const pos of positions) {
+                        const dx = Math.abs(pos.x - x);
+                        const dy = Math.abs(pos.y - y);
+                        if (dx < minSpacing && dy < minSpacing) {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                } while (overlap);
+
+                positions.push({ x, y });
+                button.style.left = `${x}px`;
+                button.style.top = `${y}px`;
+
+                button.addEventListener('click', () => {
+                    button.classList.add('transparent');
+                    resetTimer();
+                });
+
+                body.appendChild(button);
+            }
+        }
+
+        // Iniciar o reiniciar la cuenta regresiva
+        function startTimer() {
+            timeLeft = 15;
+            document.getElementById('timer').innerText = '00:15';
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                let seconds = timeLeft;
+                if (seconds < 10) seconds = '0' + seconds;
+                document.getElementById('timer').innerText = `00:${seconds}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('timer').innerText = '¡Tiempo!';
+                }
+            }, 1000);
+        }
+
+        // Reiniciar el temporizador
+        function resetTimer() {
+            startTimer();
+        }
+
+        // Configurar eventos
+        document.getElementById('startButton').addEventListener('click', () => {
+            startTimer();
+        });
+
+        // Crear los botones de letras al cargar la página
+        createLetterButtons();
+    </script>
+</body>
+</html>
